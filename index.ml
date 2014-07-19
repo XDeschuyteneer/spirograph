@@ -80,13 +80,16 @@ let alpha = ref 0.;;
 let deg_of_rad teta = teta *. (200. /. pi);;
 let rad_of_deg teta = teta *. (pi /. 200.);;
 
+let delta_teta = 20.;;
+let delta_time = 0.5;;
+
 let rec loop ctx () =
   begin
     let timer = Timer.get !initial_time in
-    if (timer >= 1.) then
+    if (timer >= delta_time) then
       begin
         debug "alpha: %f" !alpha;
-        alpha := !alpha +. (rad_of_deg 20.);
+        alpha := !alpha +. (rad_of_deg delta_teta);
         clear_canvas ctx 0 0 500 500;
         stroke_circle ctx cx cy r1;
         (* let cx', cy' = cx +. r1 -. r2, cy in *)
