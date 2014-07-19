@@ -61,9 +61,9 @@ end
 Timer.init ();;
 let initial_time = ref (Timer.make ());;
 
-let r1 = 90.;;
+let r1 = 100.;;
 let r2 = 30.;;
-let r3 = 50.;;
+let r3 = 20.;;
 let cx, cy = 200., 200.;;
 
 let inner_center cx cy teta =
@@ -77,30 +77,55 @@ let pen cx cy teta =
 
 let alpha = ref 0.;;
 
+let spirograph r k l t =
+  let a = 1. -. k
+  and b = (1. -. k) /. k in
+  let x = r *. (a *. cos t +. l *. k *. cos (b *. t))
+  and y = r *. (a *. sin t -. l *. k *. sin (b *. t)) in
+  x, y;;
+
 let deg_of_rad teta = teta *. (200. /. pi);;
 let rad_of_deg teta = teta *. (pi /. 200.);;
+let by_id_coerce s f  = Js.Opt.get (f (Dom_html.getElementById s)) (fun () -> raise Not_found);;
+let delta_teta = 5.;;
+let delta_time = 1. /. 60.;;
 
-let delta_teta = 20.;;
-let delta_time = 0.5;;
+let create_input () =
+  let d = Html.window##document in
+  let i = Html.createInput d in
+  Dom.appendChild Html.window##document##body i;
+  i;;
+
 
 let rec loop ctx () =
   begin
     let timer = Timer.get !initial_time in
-    if (timer >= delta_time) then
+    let cx', cy' = inner_center cx cy !alpha in
+
       begin
-        debug "alpha: %f" !alpha;
+        let r = by_id_coerce "r" Dom_html.CoerceTo.input in
+        let r' = by_id_coerce "R" Dom_html.CoerceTo.input in
+        let r'_value = (float_of_string (to_string r'##value)) in
+        let a, b = spirograph r'_value 0.7 0.3 !alpha in
+        stroke_rect ctx (a +. 200.) (b +. 200.) 1. 1.;
+        (* calculate new alpha *)
         alpha := !alpha +. (rad_of_deg delta_teta);
-        clear_canvas ctx 0 0 500 500;
-        stroke_circle ctx cx cy r1;
-        (* let cx', cy' = cx +. r1 -. r2, cy in *)
-        let cx', cy' = inner_center cx cy !alpha in
-        stroke_circle ctx cx' cy' r2;
-        ctx##strokeStyle <- Js.string (create_color 255 0 0);
-        let a1, a2 = pen cx' cy' !alpha in
-        stroke_line ctx cx' cy' a1 a2;
-        (* stroke_circle ctx cx' cy' r3; *)
-        ctx##strokeStyle <- Js.string (create_color 0 0 0);
-        initial_time := Timer.make ();
+        (* clear canvas *)
+        (* clear_canvas ctx 0 0 500 500; *)
+        (* (\* stroke extern circle *\) *)
+        (* stroke_circle ctx cx cy r1; *)
+        (* (\* stroke inner circle *\) *)
+        (* stroke_circle ctx cx' cy' r2; *)
+        (* ctx##strokeStyle <- Js.string (create_color 255 0 0); *)
+        (* let a1, a2 = pen cx' cy' !alpha in *)
+        (* (\* stroke point *\) *)
+        (* stroke_rect ctx a1 a2 1. 1.; *)
+        (* (\* stroke pen line in red *\) *)
+        (* stroke_line ctx cx' cy' a1 a2; *)
+        (* ctx##fill(); *)
+        (* ctx##strokeStyle <- Js.string (create_color 0 0 0); *)
+        (* initial_time := Timer.make (); *)
+
       end;
     Dom_html._requestAnimationFrame (Js.wrap_callback (loop ctx));
   end;;
