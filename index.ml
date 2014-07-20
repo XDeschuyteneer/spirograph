@@ -4,9 +4,21 @@ module Html = Dom_html
 
 let pi = 4.0 *. atan 1.0;;
 
+let deg_of_rad teta = teta *. (200. /. pi);;
+let rad_of_deg teta = teta *. (pi /. 200.);;
+
 let error f = Printf.ksprintf (fun s -> Firebug.console##error (Js.string s); failwith s) f
 let debug f = Printf.ksprintf (fun s -> Firebug.console##log(Js.string s)) f
 let alert f = Printf.ksprintf (fun s -> Dom_html.window##alert(Js.string s); failwith s) f
+
+let by_id_coerce s f  =
+  Js.Opt.get
+    (f (Dom_html.getElementById s))
+    (fun () -> raise Not_found);;
+
+let get_input id =
+  by_id_coerce id Dom_html.CoerceTo.input;;
+
 
 let create_canvas w h =
   let d = Html.window##document in
@@ -51,15 +63,6 @@ let clear_canvas ctx x y w h=
   ctx##closePath ();
   ctx##stroke ();;
 
-module Timer = struct
-  let timer = ref (fun _ -> 0.)
-  let init () = timer := (fun _ -> Unix.time ())
-  let make () = !timer ()
-  let get t = !timer () -. t
-end
-
-Timer.init ();;
-let initial_time = ref (Timer.make ());;
 
 let r1 = 100.;;
 let r2 = 30.;;
@@ -75,8 +78,6 @@ let pen cx cy teta =
   let r = r3 in
   cx +. r *. cos teta, cy +. r *. sin teta;;
 
-let alpha = ref 0.;;
-
 let spirograph r k l t =
   let a = 1. -. k
   and b = (1. -. k) /. k in
@@ -84,14 +85,9 @@ let spirograph r k l t =
   and y = r *. (a *. sin t -. l *. k *. sin (b *. t)) in
   x, y;;
 
-let deg_of_rad teta = teta *. (200. /. pi);;
-let rad_of_deg teta = teta *. (pi /. 200.);;
-let by_id_coerce s f  = Js.Opt.get (f (Dom_html.getElementById s)) (fun () -> raise Not_found);;
+let alpha = ref 0.;;
 let delta_teta = 5.;;
 let delta_time = 1. /. 60.;;
-
-let get_input id =
-  by_id_coerce id Dom_html.CoerceTo.input;;
 
 let rec loop ctx () =
   begin
