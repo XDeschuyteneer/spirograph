@@ -90,12 +90,8 @@ let by_id_coerce s f  = Js.Opt.get (f (Dom_html.getElementById s)) (fun () -> ra
 let delta_teta = 5.;;
 let delta_time = 1. /. 60.;;
 
-let create_input () =
-  let d = Html.window##document in
-  let i = Html.createInput d in
-  Dom.appendChild Html.window##document##body i;
-  i;;
-
+let get_input id =
+  by_id_coerce id Dom_html.CoerceTo.input;;
 
 let rec loop ctx () =
   begin
@@ -107,6 +103,7 @@ let rec loop ctx () =
         let r' = by_id_coerce "R" Dom_html.CoerceTo.input in
         let r_value = (float_of_string (to_string r##value)) in
         let r'_value = (float_of_string (to_string r'##value)) in
+        let color = (get_input "color_picker")##value in
         let a, b = if (r_value >= r'_value) then
                      let l = !alpha /. r'_value in
                      let k = 1. in
@@ -120,9 +117,12 @@ let rec loop ctx () =
                        spirograph r'_value 0.7 k !alpha
                      end
         in
+        ctx##strokeStyle <- color;
         stroke_rect ctx (a +. 200.) (b +. 200.) 1. 1.;
         (* calculate new alpha *)
         alpha := !alpha +. (rad_of_deg delta_teta);
+
+        (* debug "%s" (to_string color_picker##value); *)
         (* clear canvas *)
         (* clear_canvas ctx 0 0 500 500; *)
         (* (\* stroke extern circle *\) *)
