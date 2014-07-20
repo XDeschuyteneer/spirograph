@@ -105,8 +105,21 @@ let rec loop ctx () =
       begin
         let r = by_id_coerce "r" Dom_html.CoerceTo.input in
         let r' = by_id_coerce "R" Dom_html.CoerceTo.input in
+        let r_value = (float_of_string (to_string r##value)) in
         let r'_value = (float_of_string (to_string r'##value)) in
-        let a, b = spirograph r'_value 0.7 0.3 !alpha in
+        let a, b = if (r_value >= r'_value) then
+                     let l = !alpha /. r'_value in
+                     let k = 1. in
+                     begin
+                       spirograph r'_value k l !alpha
+                     end
+                   else
+                     let l = delta_teta /. r_value in
+                     let k = r_value /. r'_value in
+                     begin
+                       spirograph r'_value 0.7 k !alpha
+                     end
+        in
         stroke_rect ctx (a +. 200.) (b +. 200.) 1. 1.;
         (* calculate new alpha *)
         alpha := !alpha +. (rad_of_deg delta_teta);

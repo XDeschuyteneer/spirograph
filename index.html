@@ -10,7 +10,6 @@
 
 <head>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script src="processing.min.js"></script>
   <script src="index.js"></script>
 </head>
 
@@ -20,6 +19,8 @@
 
 <body>
   Spirograph<br/>
-  inner cercle radius: <input id="R" type="range" value="100" max="200" min="50" step="5"><br/>
-  outer cercle radius: <input id="r" type="range" value="50" max="200" min="50" step="5"><br/>
+  You can control the inner cercle radius (r) and outer cercle radius live (r).<br/>
+  If r > R, then r = R.<br/>
+  inner cercle radius: <input id="R" type="range" value="200" max="200" min="50" step="5"><br/>
+  outer cercle radius: <input id="r" type="range" value="140" max="200" min="50" step="5"><br/>
 </body>
