@@ -1,0 +1,13 @@
+This is a spirograph implementation in OCaml + HTML5.
+You can compile OCaml code with this:
+
+ocamlbuild -use-ocamlfind -pkgs js_of_ocaml,js_of_ocaml.syntax,unix -syntax camlp4o index.byte
+
+Then you can compile your ocaml bytecode to javascript:
+
+js_of_ocaml index.byte
+
+Then you can open the webpage:
+
+xdg-open index.html
+
