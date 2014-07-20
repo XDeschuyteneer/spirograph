@@ -19,6 +19,17 @@ let by_id_coerce s f  =
 let get_input id =
   by_id_coerce id Dom_html.CoerceTo.input;;
 
+let get_button id =
+  by_id_coerce id Dom_html.CoerceTo.button;;
+
+let set_button_click_event button f =
+  button##onclick <-
+    Html.handler
+      (fun ev ->
+       begin
+         f ();
+         Js._true;
+       end);;
 
 let create_canvas w h =
   let d = Html.window##document in
@@ -89,11 +100,11 @@ let alpha = ref 0.;;
 let delta_teta = 5.;;
 let delta_time = 1. /. 60.;;
 
+let paused = ref false;;
+
 let rec loop ctx () =
   begin
-    let timer = Timer.get !initial_time in
-    let cx', cy' = inner_center cx cy !alpha in
-
+    if not !paused then
       begin
         let r = by_id_coerce "r" Dom_html.CoerceTo.input in
         let r' = by_id_coerce "R" Dom_html.CoerceTo.input in
@@ -117,24 +128,6 @@ let rec loop ctx () =
         stroke_rect ctx (a +. 200.) (b +. 200.) 1. 1.;
         (* calculate new alpha *)
         alpha := !alpha +. (rad_of_deg delta_teta);
-
-        (* debug "%s" (to_string color_picker##value); *)
-        (* clear canvas *)
-        (* clear_canvas ctx 0 0 500 500; *)
-        (* (\* stroke extern circle *\) *)
-        (* stroke_circle ctx cx cy r1; *)
-        (* (\* stroke inner circle *\) *)
-        (* stroke_circle ctx cx' cy' r2; *)
-        (* ctx##strokeStyle <- Js.string (create_color 255 0 0); *)
-        (* let a1, a2 = pen cx' cy' !alpha in *)
-        (* (\* stroke point *\) *)
-        (* stroke_rect ctx a1 a2 1. 1.; *)
-        (* (\* stroke pen line in red *\) *)
-        (* stroke_line ctx cx' cy' a1 a2; *)
-        (* ctx##fill(); *)
-        (* ctx##strokeStyle <- Js.string (create_color 0 0 0); *)
-        (* initial_time := Timer.make (); *)
-
       end;
     Dom_html._requestAnimationFrame (Js.wrap_callback (loop ctx));
   end;;
@@ -146,6 +139,16 @@ Dom_html.window##onload <- Dom.handler (fun _ ->
                                           let ctx = get_context canvas in
                                           ctx##lineWidth <- 1.;
                                           ctx##strokeStyle <- Js.string color;
+                                          let button = get_button "play_pause" in
+                                          let f () =
+                                            begin
+                                              paused := not !paused;
+                                              if !paused then
+                                                button##innerHTML <- (Js.string "play")
+                                              else
+                                                button##innerHTML <- (Js.string "pause");
+                                            end in
+                                          set_button_click_event button f;
                                           Firebug.console##log (Js.string "loaded-ocaml");
                                           Dom_html._requestAnimationFrame (Js.wrap_callback (loop ctx));
                                           Js._true
